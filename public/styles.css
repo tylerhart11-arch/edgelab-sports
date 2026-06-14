@@ -558,6 +558,13 @@ dd {
   gap: 10px;
 }
 
+.health-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .example-card {
   display: grid;
   gap: 14px;

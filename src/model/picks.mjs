@@ -4,6 +4,7 @@ import { predictGame } from "./trainTest.mjs";
 export function buildRecommendedPicks(modelLab, games, options = {}) {
   const minEdge = options.minEdge ?? 0.012;
   return games
+    .filter((game) => isActionablePregame(game, options))
     .map((game) => predictGame(modelLab, game))
     .filter(Boolean)
     .map((pick) => ({
@@ -28,11 +29,22 @@ export function buildRecommendedPicks(modelLab, games, options = {}) {
       confidence: pick.confidence,
       riskFlags: pick.riskFlags,
       status: pick.game.status,
+      source: pick.game.source,
+      dataFreshness: pick.game.dataFreshness ?? "unknown",
       liveScore: pick.game.liveScore ?? null,
       result: settlePick(pick)
     }))
     .filter((pick) => pick.edge >= minEdge || pick.confidence !== "Watch")
     .sort((a, b) => b.expectedValue - a.expectedValue);
+}
+
+function isActionablePregame(game, options = {}) {
+  if (!game || game.stale || game.source === "stale-seed") return false;
+  if (game.status !== "scheduled") return false;
+  const now = options.now ? new Date(options.now).getTime() : Date.now();
+  const gameTime = new Date(game.gameTime).getTime();
+  if (!Number.isFinite(gameTime)) return false;
+  return gameTime > now - 30 * 60 * 1000;
 }
 
 export function settlePick(pick) {

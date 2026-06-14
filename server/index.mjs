@@ -15,7 +15,7 @@ const port = Number(process.env.PORT || 4317);
 const host = process.env.HOST || (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const enableLive = process.env.ENABLE_LIVE !== "false";
 const pollSeconds = Number(process.env.LIVE_POLL_SECONDS || 60);
-const appBuild = "20260614-refresh";
+const appBuild = "20260614-live-slate";
 
 const modelLab = runModelLab(historicalGames, leagues.map((league) => league.id));
 const liveScores = new LiveScoreService({ enabled: enableLive, pollSeconds });
@@ -64,7 +64,12 @@ async function handleApi(url, res) {
     const slate = liveScores.mergedSlate();
     sendJson(res, 200, {
       generatedAt: new Date().toISOString(),
-      leagues: leagueCoverageSummary(),
+      leagues: leagueCoverageSummary().map((league) => ({
+        ...league,
+        currentGames: slate.filter((game) => game.league === league.id).length,
+        liveGames: slate.filter((game) => game.league === league.id && game.source === "live-espn").length,
+        seedFallbackGames: slate.filter((game) => game.league === league.id && game.source === "seed-current").length
+      })),
       slate,
       live: liveScores.snapshot(),
       modelSummary: modelLab.aggregate

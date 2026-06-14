@@ -381,6 +381,8 @@ function confidenceLabel(probability, edge, leagueModel) {
 function riskFlags(game, probability, edge, leagueModel, pickOdds, modelMarketGap) {
   const flags = [];
   if (edge < 0.018) flags.push("thin edge");
+  if (game.source === "live-espn") flags.push("proxy odds");
+  if (game.dataFreshness === "seed-fallback") flags.push("seed fallback");
   if (modelMarketGap > 0.18) flags.push("model-market gap");
   if ((game.injurySignalHome ?? 0) > 0.22 || (game.injurySignalAway ?? 0) > 0.22) flags.push("injury volatility");
   if (Math.abs((game.restDaysHome ?? 3) - (game.restDaysAway ?? 3)) >= 4) flags.push("rest mismatch");

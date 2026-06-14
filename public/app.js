@@ -615,7 +615,7 @@ function renderPicksTable(picks) {
         <tbody>
           ${picks.map((pick) => `
             <tr>
-              <td><strong>${pick.matchup}</strong><small>${pick.league} · ${formatDate(pick.gameTime)} · ${pick.status}</small></td>
+              <td><strong>${pick.matchup}</strong><small>${pick.league} · ${formatDate(pick.gameTime)} · ${pick.status} · ${escapeHtml(sourceLabel(pick))}</small></td>
               <td>${pick.market}</td>
               <td>${pick.pick}</td>
               <td>${fmtPct(pick.modelWinProbability)}<small>${pick.model}</small></td>
@@ -660,6 +660,7 @@ function renderBoard() {
               <div><dt>Total</dt><dd>${game.total}</dd></div>
               <div><dt>Spread</dt><dd>${game.spread}</dd></div>
               <div><dt>Risk</dt><dd>${fmtPct(Math.max(game.injurySignalHome, game.injurySignalAway))}</dd></div>
+              <div><dt>Source</dt><dd>${escapeHtml(sourceLabel(game))}</dd></div>
             </dl>
           </article>
         `).join("")}
@@ -944,17 +945,26 @@ function renderLedger() {
 }
 
 function renderHealth() {
+  const live = state.snapshot.live;
+  const freshness = live.freshness ?? {
+    liveLeagues: [],
+    staleSeedGames: 0,
+    policy: "Live freshness policy unavailable on this build."
+  };
   return `
     <section class="content-grid">
       <div class="panel">
-        <div class="panel-head"><h2>Live Results</h2><span>${state.snapshot.live.mode}</span></div>
+        <div class="panel-head"><h2>Live Results</h2><span>${live.mode}</span></div>
         <dl class="health-list">
-          <div><dt>Enabled</dt><dd>${state.snapshot.live.enabled}</dd></div>
-          <div><dt>Poll interval</dt><dd>${state.snapshot.live.pollSeconds}s</dd></div>
-          <div><dt>Last update</dt><dd>${state.snapshot.live.lastUpdated || "seed fallback"}</dd></div>
-          <div><dt>Live events</dt><dd>${state.snapshot.live.scoreboard.length}</dd></div>
+          <div><dt>Enabled</dt><dd>${live.enabled}</dd></div>
+          <div><dt>Poll interval</dt><dd>${live.pollSeconds}s</dd></div>
+          <div><dt>Last update</dt><dd>${live.lastUpdated || "seed fallback"}</dd></div>
+          <div><dt>Live events</dt><dd>${live.scoreboard.length}</dd></div>
+          <div><dt>Live leagues</dt><dd>${freshness.liveLeagues.join(", ") || "none"}</dd></div>
+          <div><dt>Stale seed removed</dt><dd>${freshness.staleSeedGames}</dd></div>
         </dl>
-        ${state.snapshot.live.errors.length ? `<div class="error-box">${state.snapshot.live.errors.slice(0, 4).map((error) => `<p>${error.league || "live"}: ${error.message}</p>`).join("")}</div>` : ""}
+        <p class="health-note">${escapeHtml(freshness.policy)}</p>
+        ${live.errors.length ? `<div class="error-box">${live.errors.slice(0, 4).map((error) => `<p>${error.league || "live"}: ${error.message}</p>`).join("")}</div>` : ""}
       </div>
       <div class="panel wide">
         <div class="panel-head"><h2>League Coverage</h2><span>major U.S. sports</span></div>
@@ -1072,6 +1082,18 @@ function countBy(rows, accessor) {
 
 function formatDate(value) {
   return new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function sourceLabel(row = {}) {
+  if (row.source === "live-espn") {
+    if (row.dataFreshness === "live-schedule") return "ESPN live schedule";
+    if (row.dataFreshness === "final") return "ESPN final";
+    if (row.dataFreshness === "live") return "ESPN live";
+    return "ESPN live feed";
+  }
+  if (row.source === "seed-current" || row.dataFreshness === "seed-fallback") return "Seed fallback";
+  if (row.source === "stale-seed" || row.dataFreshness === "stale") return "Stale seed";
+  return row.source || "unknown";
 }
 
 function formatWorldCupDate(match) {
