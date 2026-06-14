@@ -2,6 +2,8 @@ import { currentSlate, getLeague, leagues } from "../src/data/sportsData.mjs";
 import { fetchEspnScoreboard } from "./providers/espn.mjs";
 import { clamp, deterministicNoise, probToAmerican } from "../src/model/stats.mjs";
 
+const DEFAULT_TIME_ZONE = "America/Chicago";
+
 const normalize = (value) => String(value || "")
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, " ")
@@ -12,10 +14,14 @@ export class LiveScoreService {
     this.enabled = options.enabled ?? true;
     this.pollSeconds = options.pollSeconds ?? 60;
     this.scoreboard = [];
+    this.rawScoreboard = [];
+    this.quarantinedEvents = [];
     this.errors = [];
     this.lastUpdated = null;
     this.mode = "seed";
     this.timer = null;
+    this.timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
+    this.dateKey = todayDateKey(options.now ?? new Date(), this.timeZone);
   }
 
   async start() {
@@ -41,17 +47,26 @@ export class LiveScoreService {
     if (!this.enabled) return this.snapshot();
     const results = [];
     const errors = [];
+    const dateKey = todayDateKey(new Date(), this.timeZone);
+    this.dateKey = dateKey;
     await Promise.all(leagues.map(async (league) => {
       try {
-        const rows = await fetchEspnScoreboard(league.id);
+        const rows = await fetchEspnScoreboard(league.id, { date: espnDateKey(dateKey) });
         results.push(...rows);
       } catch (error) {
         errors.push({ league: league.id, message: error.message, at: new Date().toISOString() });
       }
     }));
-    if (results.length) {
-      this.scoreboard = results;
-      this.mode = errors.length ? "live-partial" : "live";
+    const audit = auditLiveEvents(results, { dateKey, timeZone: this.timeZone });
+    this.rawScoreboard = results;
+    this.scoreboard = audit.validEvents;
+    this.quarantinedEvents = audit.quarantinedEvents;
+    if (results.length || errors.length < leagues.length) {
+      if (this.scoreboard.length) {
+        this.mode = errors.length ? "live-partial" : "live";
+      } else {
+        this.mode = errors.length ? "live-partial-empty" : "live-no-games";
+      }
       this.lastUpdated = new Date().toISOString();
     } else {
       this.mode = "seed";
@@ -63,6 +78,7 @@ export class LiveScoreService {
   snapshot() {
     const now = Date.now();
     const staleSeedGames = currentSlate.filter((game) => isStaleSeedGame(game, now)).length;
+    const outOfWindowSeedGames = currentSlate.filter((game) => !isGameOnDate(game.gameTime, this.dateKey, this.timeZone)).length;
     return {
       enabled: this.enabled,
       mode: this.mode,
@@ -71,42 +87,61 @@ export class LiveScoreService {
       errors: this.errors,
       scoreboard: this.scoreboard,
       freshness: {
+        dateKey: this.dateKey,
+        timeZone: this.timeZone,
         staleSeedGames,
+        outOfWindowSeedGames,
+        rawEvents: this.rawScoreboard.length,
         liveEvents: this.scoreboard.length,
+        quarantinedEvents: this.quarantinedEvents.length,
+        quarantinedSample: this.quarantinedEvents.slice(0, 6).map((event) => ({
+          league: event.league,
+          matchup: `${event.awayTeam} at ${event.homeTeam}`,
+          gameTime: event.gameTime,
+          localDate: localDateKey(event.gameTime, this.timeZone),
+          reason: event.reason
+        })),
         liveLeagues: [...new Set(this.scoreboard.map((event) => event.league))].sort(),
-        policy: "ESPN events are the primary slate. Seed games are used only when a league has no live feed and the seed game has not gone stale."
+        policy: "Today's slate is date-scoped. ESPN is requested with today's date, out-of-window provider rows are quarantined, and seed games are used only when they are also for today and not stale."
       }
     };
   }
 
   mergedSlate() {
-    return mergeLiveScores(currentSlate, this.scoreboard);
+    return mergeLiveScores(currentSlate, this.scoreboard, { dateKey: this.dateKey, timeZone: this.timeZone });
   }
 }
 
-export function mergeLiveScores(seedGames, liveGames) {
+export function mergeLiveScores(seedGames, liveGames, options = {}) {
   const now = Date.now();
+  const dateKey = normalizeDateKey(options.dateKey ?? todayDateKey(now, options.timeZone ?? DEFAULT_TIME_ZONE));
+  const timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
   const liveRows = (liveGames ?? [])
+    .filter((event) => isGameOnDate(event.gameTime, dateKey, timeZone))
     .map((event) => liveEventToSlateGame(event))
     .filter(Boolean);
   const liveLeagues = new Set(liveRows.map((game) => game.league));
   const seedRows = seedGames
     .filter((game) => !liveLeagues.has(game.league))
-    .map((game) => markSeedFreshness(game, now))
-    .filter((game) => !game.stale);
+    .map((game) => markSeedFreshness(game, now, { dateKey, timeZone }))
+    .filter((game) => !game.stale && game.inDateWindow);
 
   if (!liveRows.length) return seedRows;
   return [...liveRows, ...seedRows]
     .sort((a, b) => new Date(a.gameTime) - new Date(b.gameTime));
 }
 
-function markSeedFreshness(game, now = Date.now()) {
+function markSeedFreshness(game, now = Date.now(), options = {}) {
   const stale = isStaleSeedGame(game, now);
+  const timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
+  const dateKey = normalizeDateKey(options.dateKey ?? todayDateKey(now, timeZone));
+  const inDateWindow = isGameOnDate(game.gameTime, dateKey, timeZone);
   return {
     ...game,
     stale,
+    inDateWindow,
     source: stale ? "stale-seed" : game.source,
-    dataFreshness: stale ? "stale" : "seed-fallback"
+    dataFreshness: stale ? "stale" : inDateWindow ? "seed-fallback" : "out-of-window"
   };
 }
 
@@ -158,6 +193,53 @@ function liveEventToSlateGame(event) {
       sourceUpdatedAt: event.sourceUpdatedAt
     }
   };
+}
+
+export function auditLiveEvents(events, options = {}) {
+  const timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
+  const dateKey = normalizeDateKey(options.dateKey ?? todayDateKey(options.now ?? new Date(), timeZone));
+  const validEvents = [];
+  const quarantinedEvents = [];
+  for (const event of events ?? []) {
+    if (!isGameOnDate(event.gameTime, dateKey, timeZone)) {
+      quarantinedEvents.push({ ...event, reason: "outside-today-window" });
+      continue;
+    }
+    validEvents.push(event);
+  }
+  return { dateKey, timeZone, validEvents, quarantinedEvents };
+}
+
+export function todayDateKey(now = new Date(), timeZone = DEFAULT_TIME_ZONE) {
+  return localDateKey(now, timeZone);
+}
+
+export function espnDateKey(dateKey) {
+  return normalizeDateKey(dateKey).replaceAll("-", "");
+}
+
+export function localDateKey(value, timeZone = DEFAULT_TIME_ZONE) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${lookup.year}-${lookup.month}-${lookup.day}`;
+}
+
+function normalizeDateKey(dateKey) {
+  const raw = String(dateKey || "").trim();
+  if (/^\d{8}$/.test(raw)) return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return localDateKey(new Date(raw), DEFAULT_TIME_ZONE);
+}
+
+function isGameOnDate(gameTime, dateKey, timeZone = DEFAULT_TIME_ZONE) {
+  return localDateKey(gameTime, timeZone) === normalizeDateKey(dateKey);
 }
 
 function syntheticMarket(event, league) {

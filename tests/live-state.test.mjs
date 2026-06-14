@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { isStaleSeedGame, mergeLiveScores } from "../server/liveState.mjs";
+import { auditLiveEvents, espnDateKey, isStaleSeedGame, mergeLiveScores, todayDateKey } from "../server/liveState.mjs";
 
 const staleScheduledSeed = {
   id: "seed-old-nba",
@@ -32,7 +32,7 @@ const futureSeed = {
   id: "seed-future-nfl",
   league: "NFL",
   sport: "Football",
-  gameTime: "2099-09-10T00:20:00.000Z",
+  gameTime: "2099-06-14T20:20:00.000Z",
   awayTeamId: "DAL",
   awayTeam: "Dallas Cowboys",
   homeTeamId: "PHI",
@@ -43,7 +43,7 @@ const liveEspnEvent = {
   provider: "espn",
   providerId: "401547650",
   league: "NBA",
-  gameTime: "2099-06-14T00:00:00.000Z",
+  gameTime: "2099-06-14T20:00:00.000Z",
   status: "scheduled",
   homeTeam: "Boston Celtics",
   awayTeam: "Oklahoma City Thunder",
@@ -62,7 +62,10 @@ test("stale seed detection catches old scheduled seed rows", () => {
 });
 
 test("live ESPN rows replace stale league seeds and preserve fresh seed fallbacks", () => {
-  const merged = mergeLiveScores([staleScheduledSeed, futureSeed], [liveEspnEvent]);
+  const merged = mergeLiveScores([staleScheduledSeed, futureSeed], [liveEspnEvent], {
+    dateKey: "2099-06-14",
+    timeZone: "America/Chicago"
+  });
 
   assert.equal(merged.some((game) => game.id === staleScheduledSeed.id), false);
 
@@ -80,4 +83,34 @@ test("live ESPN rows replace stale league seeds and preserve fresh seed fallback
   assert.ok(fallback);
   assert.equal(fallback.source, "seed-current");
   assert.equal(fallback.dataFreshness, "seed-fallback");
+});
+
+test("live slate is date-scoped and quarantines provider rows outside today", () => {
+  const tomorrowEvent = {
+    ...liveEspnEvent,
+    providerId: "tomorrow",
+    gameTime: "2099-06-15T20:00:00.000Z",
+    homeTeam: "Tomorrow Home",
+    awayTeam: "Tomorrow Away"
+  };
+
+  const audit = auditLiveEvents([liveEspnEvent, tomorrowEvent], {
+    dateKey: "2099-06-14",
+    timeZone: "America/Chicago"
+  });
+  assert.equal(audit.validEvents.length, 1);
+  assert.equal(audit.quarantinedEvents.length, 1);
+  assert.equal(audit.quarantinedEvents[0].reason, "outside-today-window");
+
+  const merged = mergeLiveScores([], [liveEspnEvent, tomorrowEvent], {
+    dateKey: "2099-06-14",
+    timeZone: "America/Chicago"
+  });
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].providerId, liveEspnEvent.providerId);
+});
+
+test("today date keys are stable for ESPN date-scoped requests", () => {
+  assert.equal(todayDateKey(new Date("2026-06-14T12:00:00-05:00"), "America/Chicago"), "2026-06-14");
+  assert.equal(espnDateKey("2026-06-14"), "20260614");
 });

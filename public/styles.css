@@ -565,6 +565,10 @@ dd {
   line-height: 1.45;
 }
 
+.health-quality-grid {
+  margin-top: 12px;
+}
+
 .example-card {
   display: grid;
   gap: 14px;

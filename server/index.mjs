@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { historicalGames, leagueCoverageSummary, leagues } from "../src/data/sportsData.mjs";
 import { buildAccuracyReport, buildRecommendedPicks } from "../src/model/picks.mjs";
 import { runModelLab } from "../src/model/trainTest.mjs";
-import { LiveScoreService } from "./liveState.mjs";
+import { LiveScoreService, localDateKey } from "./liveState.mjs";
 import { worldCupDashboard } from "./providers/worldcup2026.mjs";
 import { worldCupOddsBoard } from "./providers/worldcupOdds.mjs";
 
@@ -15,7 +15,7 @@ const port = Number(process.env.PORT || 4317);
 const host = process.env.HOST || (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const enableLive = process.env.ENABLE_LIVE !== "false";
 const pollSeconds = Number(process.env.LIVE_POLL_SECONDS || 60);
-const appBuild = "20260614-live-slate";
+const appBuild = "20260614-today-slate";
 
 const modelLab = runModelLab(historicalGames, leagues.map((league) => league.id));
 const liveScores = new LiveScoreService({ enabled: enableLive, pollSeconds });
@@ -46,12 +46,15 @@ const server = createServer(async (req, res) => {
 
 async function handleApi(url, res) {
   if (url.pathname === "/api/health") {
+    const live = liveScores.snapshot();
+    const slate = liveScores.mergedSlate();
     sendJson(res, 200, {
       ok: true,
       app: "EdgeLab Sports",
       build: appBuild,
       generatedAt: new Date().toISOString(),
-      live: liveScores.snapshot(),
+      live,
+      dataQuality: buildSlateDataQuality(slate, live.freshness),
       model: {
         leagues: leagues.length,
         aggregateBestModel: modelLab.aggregate[0]?.name,
@@ -62,6 +65,7 @@ async function handleApi(url, res) {
   }
   if (url.pathname === "/api/snapshot") {
     const slate = liveScores.mergedSlate();
+    const live = liveScores.snapshot();
     sendJson(res, 200, {
       generatedAt: new Date().toISOString(),
       leagues: leagueCoverageSummary().map((league) => ({
@@ -71,7 +75,8 @@ async function handleApi(url, res) {
         seedFallbackGames: slate.filter((game) => game.league === league.id && game.source === "seed-current").length
       })),
       slate,
-      live: liveScores.snapshot(),
+      live,
+      dataQuality: buildSlateDataQuality(slate, live.freshness),
       modelSummary: modelLab.aggregate
     });
     return;
@@ -147,6 +152,68 @@ function sendJson(res, status, body) {
 function sendText(res, status, body) {
   res.writeHead(status, { "content-type": "text/plain; charset=utf-8" });
   res.end(body);
+}
+
+function buildSlateDataQuality(slate, freshness = {}) {
+  const dateKey = freshness.dateKey;
+  const timeZone = freshness.timeZone || "America/Chicago";
+  const ids = new Map();
+  const duplicateIds = [];
+  const invalidRows = [];
+  const staleRows = [];
+  const outOfWindowRows = [];
+  const scoreErrors = [];
+
+  for (const game of slate) {
+    if (ids.has(game.id)) duplicateIds.push(game.id);
+    ids.set(game.id, true);
+
+    const reasons = [];
+    if (!game.id) reasons.push("missing id");
+    if (!game.league) reasons.push("missing league");
+    if (!game.homeTeam || !game.awayTeam) reasons.push("missing team");
+    if (!Number.isFinite(new Date(game.gameTime).getTime())) reasons.push("bad game time");
+    if (!["scheduled", "live", "final"].includes(game.status)) reasons.push("bad status");
+    if (reasons.length) invalidRows.push({ id: game.id, reasons });
+
+    if (game.stale || game.source === "stale-seed" || game.dataFreshness === "stale") {
+      staleRows.push(game.id);
+    }
+
+    if (dateKey && localDateKey(game.gameTime, timeZone) !== dateKey) {
+      outOfWindowRows.push(game.id);
+    }
+
+    if ((game.status === "live" || game.status === "final") &&
+        (!Number.isFinite(game.homeScore) || !Number.isFinite(game.awayScore))) {
+      scoreErrors.push(game.id);
+    }
+  }
+
+  const checks = [
+    qualityCheck("today date window", outOfWindowRows.length === 0, `${outOfWindowRows.length} rows outside ${dateKey || "today"}`),
+    qualityCheck("stale seed exclusion", staleRows.length === 0, `${staleRows.length} stale rows in slate`),
+    qualityCheck("required fields", invalidRows.length === 0, `${invalidRows.length} invalid rows`),
+    qualityCheck("live/final scores", scoreErrors.length === 0, `${scoreErrors.length} live/final rows missing scores`),
+    qualityCheck("duplicate ids", duplicateIds.length === 0, `${duplicateIds.length} duplicate ids`)
+  ];
+
+  return {
+    status: checks.every((check) => check.status === "pass") ? "pass" : "fail",
+    rowCount: slate.length,
+    dateKey,
+    timeZone,
+    outOfWindowRows: outOfWindowRows.length,
+    staleRows: staleRows.length,
+    invalidRows: invalidRows.length,
+    scoreErrors: scoreErrors.length,
+    duplicateIds: duplicateIds.length,
+    checks
+  };
+}
+
+function qualityCheck(name, passed, detail) {
+  return { name, status: passed ? "pass" : "fail", detail };
 }
 
 server.listen(port, host, () => {

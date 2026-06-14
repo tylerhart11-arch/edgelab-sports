@@ -951,19 +951,50 @@ function renderHealth() {
     staleSeedGames: 0,
     policy: "Live freshness policy unavailable on this build."
   };
+  const dataQuality = state.snapshot.dataQuality ?? {
+    status: "unknown",
+    outOfWindowRows: 0,
+    staleRows: 0,
+    invalidRows: 0,
+    scoreErrors: 0,
+    duplicateIds: 0,
+    checks: []
+  };
   return `
     <section class="content-grid">
       <div class="panel">
         <div class="panel-head"><h2>Live Results</h2><span>${live.mode}</span></div>
         <dl class="health-list">
+          <div><dt>Quality status</dt><dd>${escapeHtml(dataQuality.status)}</dd></div>
           <div><dt>Enabled</dt><dd>${live.enabled}</dd></div>
           <div><dt>Poll interval</dt><dd>${live.pollSeconds}s</dd></div>
+          <div><dt>Date window</dt><dd>${freshness.dateKey || "today"} ${freshness.timeZone ? `(${freshness.timeZone})` : ""}</dd></div>
           <div><dt>Last update</dt><dd>${live.lastUpdated || "seed fallback"}</dd></div>
+          <div><dt>Raw provider events</dt><dd>${freshness.rawEvents ?? live.scoreboard.length}</dd></div>
           <div><dt>Live events</dt><dd>${live.scoreboard.length}</dd></div>
           <div><dt>Live leagues</dt><dd>${freshness.liveLeagues.join(", ") || "none"}</dd></div>
           <div><dt>Stale seed removed</dt><dd>${freshness.staleSeedGames}</dd></div>
+          <div><dt>Out-of-window seed removed</dt><dd>${freshness.outOfWindowSeedGames ?? 0}</dd></div>
+          <div><dt>Provider rows quarantined</dt><dd>${freshness.quarantinedEvents ?? 0}</dd></div>
+          <div><dt>Slate rows outside today</dt><dd>${dataQuality.outOfWindowRows}</dd></div>
+          <div><dt>Invalid slate rows</dt><dd>${dataQuality.invalidRows}</dd></div>
+          <div><dt>Duplicate game IDs</dt><dd>${dataQuality.duplicateIds}</dd></div>
         </dl>
         <p class="health-note">${escapeHtml(freshness.policy)}</p>
+        <div class="quality-grid health-quality-grid">
+          ${dataQuality.checks.map((check) => `
+            <article class="quality-check ${check.status === "pass" ? "" : "fail"}">
+              <strong>${escapeHtml(check.name)}</strong>
+              <span>${escapeHtml(check.status)}</span>
+              <p>${escapeHtml(check.detail)}</p>
+            </article>
+          `).join("")}
+        </div>
+        ${freshness.quarantinedSample?.length ? `
+          <div class="error-box">
+            ${freshness.quarantinedSample.map((event) => `<p>${escapeHtml(event.league)}: ${escapeHtml(event.matchup)} / ${escapeHtml(event.localDate)} / ${escapeHtml(event.reason)}</p>`).join("")}
+          </div>
+        ` : ""}
         ${live.errors.length ? `<div class="error-box">${live.errors.slice(0, 4).map((error) => `<p>${error.league || "live"}: ${error.message}</p>`).join("")}</div>` : ""}
       </div>
       <div class="panel wide">
@@ -1093,6 +1124,7 @@ function sourceLabel(row = {}) {
   }
   if (row.source === "seed-current" || row.dataFreshness === "seed-fallback") return "Seed fallback";
   if (row.source === "stale-seed" || row.dataFreshness === "stale") return "Stale seed";
+  if (row.dataFreshness === "out-of-window") return "Outside today window";
   return row.source || "unknown";
 }
 
