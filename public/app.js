@@ -38,8 +38,8 @@ async function loadData() {
     fetchJson("/api/picks"),
     fetchJson("/api/accuracy"),
     fetchJson("/api/model-lab"),
-    fetchJson("/api/world-cup-2026"),
-    fetchJson("/api/odds/world-cup-2026")
+    fetchJson("/api/world-cup-2026?refresh=true"),
+    fetchJson("/api/odds/world-cup-2026?refresh=true")
   ]);
   state.snapshot = snapshot;
   state.picks = picks.picks;

@@ -93,7 +93,7 @@ World Cup 2026 source refresh:
 node scripts/refresh-worldcup2026.mjs
 ```
 
-The app ships with a local World Cup seed so it works offline. The `/api/world-cup-2026?refresh=true` endpoint can also attempt a fresh public-source pull and falls back to the local seed if the source is unavailable.
+The app ships with a local World Cup seed so it works offline. The `/api/world-cup-2026` endpoint now attempts a fresh public-source pull by default and falls back to the local seed if the source is unavailable. Use `?refresh=false` when you specifically want the checked-in offline seed.
 
 World Cup odds and closing-line refresh:
 

@@ -13,7 +13,7 @@ export async function worldCupDashboard({ refresh = false } = {}) {
   }
 
   if (!refresh) {
-    return buildWorldCupDashboard();
+    return cachedDashboard ?? buildWorldCupDashboard();
   }
 
   try {

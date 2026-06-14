@@ -1,4 +1,4 @@
-const CACHE_NAME = "edgelab-sports-v4-worldcup";
+const CACHE_NAME = "edgelab-sports-v6-refresh";
 const APP_SHELL = [
   "/",
   "/index.html",

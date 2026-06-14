@@ -610,7 +610,8 @@ function buildQualitySummary(matches, teams, predictions, sourceMeta, refreshErr
 export function buildWorldCupDashboard(data = {}, options = {}) {
   const teams = data.teams ?? worldCupTeams;
   const groups = data.groups ?? worldCupGroups;
-  const matches = data.matches ?? worldCupMatches;
+  const matches = [...(data.matches ?? worldCupMatches)]
+    .sort((a, b) => (a.matchNo ?? 999) - (b.matchNo ?? 999));
   const sourceMeta = data.sourceMeta ?? data.meta ?? worldCupSourceMeta;
   const predictions = matches.map((match) => predictWorldCupMatch(match, teams));
   const bestPicks = predictions

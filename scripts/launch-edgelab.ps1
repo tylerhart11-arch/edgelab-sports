@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $port = if ($env:PORT) { $env:PORT } else { "4317" }
 $baseUrl = "http://127.0.0.1:$port"
-$buildStamp = "20260614-worldcup"
+$buildStamp = "20260614-refresh"
 $url = "$baseUrl/?view=worldcup&build=$buildStamp"
 
 try {

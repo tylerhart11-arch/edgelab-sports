@@ -1,3 +1,5 @@
+import { worldCupMatches as seedWorldCupMatches } from "./worldCup2026Data.mjs";
+
 const GROUPS = "ABCDEFGHIJKL".split("");
 const WIKI_RAW_BASE = "https://en.wikipedia.org/w/index.php";
 
@@ -73,6 +75,20 @@ function extractScore(rawScore, block) {
   };
 }
 
+function fallbackMatchNo(section, group, homeCode, awayCode) {
+  const sameSection = seedWorldCupMatches.find((match) =>
+    match.section === section &&
+    match.group === group
+  );
+  if (sameSection?.matchNo) return sameSection.matchNo;
+
+  const sameTeams = seedWorldCupMatches.find((match) =>
+    match.homeCode === homeCode &&
+    match.awayCode === awayCode
+  );
+  return sameTeams?.matchNo ?? null;
+}
+
 function extractDate(rawDate) {
   const match = rawDate.match(/Start date\|(\d{4})\|(\d{1,2})\|(\d{1,2})/);
   if (!match) return "";
@@ -136,7 +152,9 @@ function parseFootballBoxes(wikitext, group = null) {
     const rawTeam2 = getField(block, "team2");
     const homeCode = extractTeamCode(rawTeam1);
     const awayCode = extractTeamCode(rawTeam2);
-    const { matchNo, score } = extractScore(getField(block, "score"), block);
+    const extractedScore = extractScore(getField(block, "score"), block);
+    const matchNo = extractedScore.matchNo ?? fallbackMatchNo(match[2], group, homeCode, awayCode);
+    const { score } = extractedScore;
     const { venue, city } = parseVenue(getField(block, "stadium"));
     const homeTeam = cleanTeam(rawTeam1, headingTeams[0] || title);
     const awayTeam = cleanTeam(rawTeam2, headingTeams[1] || "");

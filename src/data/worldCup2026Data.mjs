@@ -2,10 +2,12 @@
 // Source-backed seed for local/offline use; the API can refresh from public sources when network is available.
 
 export const worldCupSourceMeta = {
-  "generatedAt": "2026-06-12T17:41:15.358Z",
-  "sourceAccessedAt": "2026-06-12T17:41:15.359Z",
+  "generatedAt": "2026-06-14T20:01:34.497Z",
+  "sourceAccessedAt": "2026-06-14T20:01:34.503Z",
   "sourceCount": 4,
-  "warnings": []
+  "warnings": [
+    "Missing match number for E1"
+  ]
 };
 
 export const worldCupSources = [
@@ -676,12 +678,12 @@ export const worldCupMatches = [
     "awayTeam": "Bosnia and Herzegovina",
     "homeCode": "CAN",
     "awayCode": "BIH",
-    "score": "",
+    "score": "1–1",
     "venue": "BMO Field",
     "city": "Toronto",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-4",
@@ -695,12 +697,12 @@ export const worldCupMatches = [
     "awayTeam": "Paraguay",
     "homeCode": "USA",
     "awayCode": "PAR",
-    "score": "",
+    "score": "4–1",
     "venue": "SoFi Stadium",
     "city": "Inglewood",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-5",
@@ -714,12 +716,12 @@ export const worldCupMatches = [
     "awayTeam": "Scotland",
     "homeCode": "HAI",
     "awayCode": "SCO",
-    "score": "",
+    "score": "0–1",
     "venue": "Gillette Stadium",
     "city": "Foxborough",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-6",
@@ -733,12 +735,12 @@ export const worldCupMatches = [
     "awayTeam": "Turkey",
     "homeCode": "AUS",
     "awayCode": "TUR",
-    "score": "",
+    "score": "2–0",
     "venue": "BC Place",
     "city": "Vancouver",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-7",
@@ -752,12 +754,12 @@ export const worldCupMatches = [
     "awayTeam": "Morocco",
     "homeCode": "BRA",
     "awayCode": "MAR",
-    "score": "",
+    "score": "1–1",
     "venue": "MetLife Stadium",
     "city": "East Rutherford",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-8",
@@ -771,12 +773,12 @@ export const worldCupMatches = [
     "awayTeam": "Switzerland",
     "homeCode": "QAT",
     "awayCode": "SUI",
-    "score": "",
+    "score": "1–1",
     "venue": "Levi's Stadium",
     "city": "Santa Clara",
-    "status": "scheduled",
+    "status": "final",
     "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
+    "dataQuality": "settled-score"
   },
   {
     "id": "wc26-9",
@@ -793,25 +795,6 @@ export const worldCupMatches = [
     "score": "",
     "venue": "Lincoln Financial Field",
     "city": "Philadelphia",
-    "status": "scheduled",
-    "participantStatus": "known",
-    "dataQuality": "source-backed-fixture"
-  },
-  {
-    "id": "wc26-10",
-    "matchNo": 10,
-    "group": "E",
-    "stage": "Group Stage",
-    "section": "E1",
-    "date": "2026-06-14",
-    "timeLocal": "12:00 p.m. UTC−5",
-    "homeTeam": "Germany",
-    "awayTeam": "Curaçao",
-    "homeCode": "GER",
-    "awayCode": "CUW",
-    "score": "",
-    "venue": "NRG Stadium",
-    "city": "Houston",
     "status": "scheduled",
     "participantStatus": "known",
     "dataQuality": "source-backed-fixture"
@@ -2601,5 +2584,24 @@ export const worldCupMatches = [
     "status": "scheduled",
     "participantStatus": "placeholder",
     "dataQuality": "bracket-placeholder"
+  },
+  {
+    "id": "wc26-10",
+    "matchNo": 10,
+    "group": "E",
+    "stage": "Group Stage",
+    "section": "E1",
+    "date": "2026-06-14",
+    "timeLocal": "12:00 p.m. UTC−5",
+    "homeTeam": "Germany",
+    "awayTeam": "Curaçao",
+    "homeCode": "GER",
+    "awayCode": "CUW",
+    "score": "7–1",
+    "venue": "NRG Stadium",
+    "city": "Houston",
+    "status": "final",
+    "participantStatus": "known",
+    "dataQuality": "settled-score"
   }
 ];

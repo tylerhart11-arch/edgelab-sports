@@ -15,7 +15,7 @@ const port = Number(process.env.PORT || 4317);
 const host = process.env.HOST || (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const enableLive = process.env.ENABLE_LIVE !== "false";
 const pollSeconds = Number(process.env.LIVE_POLL_SECONDS || 60);
-const appBuild = "20260614-worldcup";
+const appBuild = "20260614-refresh";
 
 const modelLab = runModelLab(historicalGames, leagues.map((league) => league.id));
 const liveScores = new LiveScoreService({ enabled: enableLive, pollSeconds });
@@ -93,12 +93,14 @@ async function handleApi(url, res) {
     return;
   }
   if (url.pathname === "/api/world-cup-2026") {
-    sendJson(res, 200, await worldCupDashboard({ refresh: url.searchParams.get("refresh") === "true" }));
+    const refresh = url.searchParams.get("refresh") !== "false";
+    sendJson(res, 200, await worldCupDashboard({ refresh }));
     return;
   }
   if (url.pathname === "/api/odds/world-cup-2026") {
+    const refresh = url.searchParams.get("refresh") !== "false";
     sendJson(res, 200, await worldCupOddsBoard({
-      refresh: url.searchParams.get("refresh") === "true",
+      refresh,
       persist: url.searchParams.get("persist") === "true"
     }));
     return;
