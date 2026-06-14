@@ -15,6 +15,7 @@ const port = Number(process.env.PORT || 4317);
 const host = process.env.HOST || (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const enableLive = process.env.ENABLE_LIVE !== "false";
 const pollSeconds = Number(process.env.LIVE_POLL_SECONDS || 60);
+const appBuild = "20260614-worldcup";
 
 const modelLab = runModelLab(historicalGames, leagues.map((league) => league.id));
 const liveScores = new LiveScoreService({ enabled: enableLive, pollSeconds });
@@ -48,6 +49,7 @@ async function handleApi(url, res) {
     sendJson(res, 200, {
       ok: true,
       app: "EdgeLab Sports",
+      build: appBuild,
       generatedAt: new Date().toISOString(),
       live: liveScores.snapshot(),
       model: {
@@ -117,7 +119,13 @@ async function serveStatic(pathname, res) {
     return;
   }
   const body = await readFile(filePath);
-  res.writeHead(200, { "content-type": mimeTypes[extname(filePath)] || "application/octet-stream" });
+  const headers = {
+    "content-type": mimeTypes[extname(filePath)] || "application/octet-stream"
+  };
+  if ([".html", ".js", ".css", ".webmanifest"].includes(extname(filePath))) {
+    headers["cache-control"] = "no-store";
+  }
+  res.writeHead(200, headers);
   res.end(body);
 }
 
