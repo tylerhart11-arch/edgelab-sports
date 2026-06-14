@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: edgelab-sports
+    runtime: node
+    plan: starter
+    region: ohio
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: ENABLE_LIVE
+        value: true
+      - key: LIVE_POLL_SECONDS
+        value: 60
+      - key: EDGELAB_DATA_DIR
+        value: /var/data
+      - key: ODDS_API_KEY
+        sync: false
+      - key: ODDS_API_REGIONS
+        value: us
+      - key: ODDS_API_MARKETS
+        value: h2h
+      - key: ODDS_API_WORLD_CUP_SPORT_KEY
+        value: soccer_fifa_world_cup
+    disk:
+      name: edgelab-data
+      mountPath: /var/data
+      sizeGB: 1

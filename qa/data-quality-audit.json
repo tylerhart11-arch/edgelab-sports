@@ -1,0 +1,720 @@
+{
+  "generatedAt": "2026-06-10T21:58:33.733Z",
+  "sourceFiles": [
+    "src/data/sportsData.mjs",
+    "src/model/trainTest.mjs",
+    "src/model/picks.mjs",
+    "server/providers/espn.mjs"
+  ],
+  "datasetSummary": {
+    "intendedUse": "sports betting analytics dashboard, model tuning view, best-bets recommendations, and accuracy reporting",
+    "grain": {
+      "historicalGames": "one row per league-game-season matchup at pregame moneyline grain",
+      "currentSlate": "one row per upcoming or live game at moneyline market grain",
+      "modelPredictions": "one row per holdout game per model candidate"
+    },
+    "leagues": [
+      "NFL",
+      "NBA",
+      "MLB",
+      "NHL",
+      "MLS",
+      "NCAAF",
+      "NCAAB"
+    ],
+    "seasons": [
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "rowCounts": {
+      "historicalGames": 928,
+      "currentSlate": 7,
+      "allGameRows": 935,
+      "recommendedPicks": 7
+    },
+    "modelAccuracy": {
+      "overall": {
+        "picks": 232,
+        "wins": 167,
+        "losses": 65,
+        "pushes": 0,
+        "accuracy": 0.7198275862068966,
+        "logLoss": 0.5136879219471375,
+        "brier": 0.17499810811729197,
+        "calibrationError": 0.051630773361430383,
+        "roi": 0.10694640121910438,
+        "avgEdgeProxy": 0.051452924558296344
+      },
+      "recommended": {
+        "picks": 144,
+        "wins": 111,
+        "losses": 33,
+        "pushes": 0,
+        "accuracy": 0.7708333333333334,
+        "logLoss": 0.4294829263209069,
+        "brier": 0.14142473003618516,
+        "calibrationError": 0.09106475365571193,
+        "roi": 0.1604251877781104,
+        "avgEdgeProxy": 0.11374098901333957
+      },
+      "bySport": [
+        {
+          "name": "Football",
+          "picks": 64,
+          "wins": 36,
+          "losses": 28,
+          "pushes": 0,
+          "accuracy": 0.5625,
+          "logLoss": 0.7213303307337365,
+          "brier": 0.26305441335335566,
+          "calibrationError": 0.13867419308324758,
+          "roi": -0.013490361248457386,
+          "avgEdgeProxy": 0.02014997516531102
+        },
+        {
+          "name": "Basketball",
+          "picks": 64,
+          "wins": 35,
+          "losses": 29,
+          "pushes": 0,
+          "accuracy": 0.546875,
+          "logLoss": 0.6784778442480183,
+          "brier": 0.24273105285939153,
+          "calibrationError": 0.08009169165681664,
+          "roi": -0.021036019405288056,
+          "avgEdgeProxy": 0.010063022969930209
+        },
+        {
+          "name": "Baseball",
+          "picks": 40,
+          "wins": 38,
+          "losses": 2,
+          "pushes": 0,
+          "accuracy": 0.95,
+          "logLoss": 0.28025463254002597,
+          "brier": 0.07605160550179431,
+          "calibrationError": 0.17591590115197434,
+          "roi": 0.3380788804662773,
+          "avgEdgeProxy": 0.1060407113645788
+        },
+        {
+          "name": "Hockey",
+          "picks": 32,
+          "wins": 27,
+          "losses": 5,
+          "pushes": 0,
+          "accuracy": 0.84375,
+          "logLoss": 0.39328548773971755,
+          "brier": 0.11971902237530015,
+          "calibrationError": 0.12565553936512097,
+          "roi": 0.19005944498526312,
+          "avgEdgeProxy": 0.08168616473780028
+        },
+        {
+          "name": "Soccer",
+          "picks": 32,
+          "wins": 31,
+          "losses": 1,
+          "pushes": 0,
+          "accuracy": 0.96875,
+          "logLoss": 0.18101730573848668,
+          "brier": 0.042381822172329206,
+          "calibrationError": 0.11290117107065635,
+          "roi": 0.231756124577888,
+          "avgEdgeProxy": 0.09837065283364213
+        }
+      ],
+      "byLeague": [
+        {
+          "name": "MLB",
+          "picks": 40,
+          "wins": 38,
+          "losses": 2,
+          "pushes": 0,
+          "accuracy": 0.95,
+          "logLoss": 0.28025463254002597,
+          "brier": 0.07605160550179431,
+          "calibrationError": 0.17591590115197434,
+          "roi": 0.3380788804662773,
+          "avgEdgeProxy": 0.1060407113645788
+        },
+        {
+          "name": "NFL",
+          "picks": 32,
+          "wins": 18,
+          "losses": 14,
+          "pushes": 0,
+          "accuracy": 0.5625,
+          "logLoss": 0.7124720162324629,
+          "brier": 0.25892841220891294,
+          "calibrationError": 0.17345987746211286,
+          "roi": -0.02919222085238817,
+          "avgEdgeProxy": 0.04081754960111187
+        },
+        {
+          "name": "NBA",
+          "picks": 32,
+          "wins": 15,
+          "losses": 17,
+          "pushes": 0,
+          "accuracy": 0.46875,
+          "logLoss": 0.6737354632805264,
+          "brier": 0.24049154714139068,
+          "calibrationError": 0.14857400774699714,
+          "roi": -0.19724374215233864,
+          "avgEdgeProxy": -0.0014158927612482521
+        },
+        {
+          "name": "NHL",
+          "picks": 32,
+          "wins": 27,
+          "losses": 5,
+          "pushes": 0,
+          "accuracy": 0.84375,
+          "logLoss": 0.39328548773971755,
+          "brier": 0.11971902237530015,
+          "calibrationError": 0.12565553936512097,
+          "roi": 0.19005944498526312,
+          "avgEdgeProxy": 0.08168616473780028
+        },
+        {
+          "name": "MLS",
+          "picks": 32,
+          "wins": 31,
+          "losses": 1,
+          "pushes": 0,
+          "accuracy": 0.96875,
+          "logLoss": 0.18101730573848668,
+          "brier": 0.042381822172329206,
+          "calibrationError": 0.11290117107065635,
+          "roi": 0.231756124577888,
+          "avgEdgeProxy": 0.09837065283364213
+        },
+        {
+          "name": "NCAAF",
+          "picks": 32,
+          "wins": 18,
+          "losses": 14,
+          "pushes": 0,
+          "accuracy": 0.5625,
+          "logLoss": 0.7301886452350101,
+          "brier": 0.26718041449779834,
+          "calibrationError": 0.16363270609920721,
+          "roi": 0.0022114983554733687,
+          "avgEdgeProxy": -0.0005175992704898481
+        },
+        {
+          "name": "NCAAB",
+          "picks": 32,
+          "wins": 20,
+          "losses": 12,
+          "pushes": 0,
+          "accuracy": 0.625,
+          "logLoss": 0.6832202252155101,
+          "brier": 0.24497055857739242,
+          "calibrationError": 0.09342787618348791,
+          "roi": 0.15517170334176253,
+          "avgEdgeProxy": 0.021541938701108675
+        }
+      ]
+    }
+  },
+  "checks": {
+    "completeness": {
+      "requiredColumns": [
+        "id",
+        "league",
+        "sport",
+        "season",
+        "gameTime",
+        "status",
+        "homeTeam",
+        "awayTeam",
+        "homeMoneyline",
+        "awayMoneyline",
+        "total",
+        "spread"
+      ],
+      "nullRates": {
+        "id": 0,
+        "league": 0,
+        "sport": 0,
+        "season": 0,
+        "gameTime": 0,
+        "status": 0,
+        "homeTeam": 0,
+        "awayTeam": 0,
+        "homeMoneyline": 0,
+        "awayMoneyline": 0,
+        "total": 0,
+        "spread": 0
+      }
+    },
+    "uniqueness": {
+      "duplicateGameIds": [],
+      "duplicateCurrentSlateIds": [],
+      "duplicateHistoricalCompositeKeys": []
+    },
+    "validity": {
+      "invalidOddsRows": [],
+      "invalidScores": [],
+      "statusValues": {
+        "final": 928,
+        "scheduled": 7
+      }
+    },
+    "integrity": {
+      "badLeagueRefs": [],
+      "badTeamRefs": [],
+      "missingEspnMappings": []
+    },
+    "timeliness": {
+      "pastCurrentSlateRowsNotFinal": [
+        {
+          "id": "NBA-2026-OKC-BOS",
+          "league": "NBA",
+          "status": "scheduled",
+          "gameDate": "2026-06-09",
+          "isPast": true
+        },
+        {
+          "id": "NHL-2026-EDM-FLA",
+          "league": "NHL",
+          "status": "scheduled",
+          "gameDate": "2026-06-09",
+          "isPast": true
+        },
+        {
+          "id": "MLB-2026-TEX-NYY",
+          "league": "MLB",
+          "status": "scheduled",
+          "gameDate": "2026-06-08",
+          "isPast": true
+        },
+        {
+          "id": "MLS-2026-DAL-MIA",
+          "league": "MLS",
+          "status": "scheduled",
+          "gameDate": "2026-06-10",
+          "isPast": true
+        }
+      ],
+      "minHistoricalDate": "2022-05-03T19:00:00-05:00",
+      "maxHistoricalDate": "2025-12-20T19:00:00-05:00",
+      "minCurrentDate": "2026-06-08T18:05:00-05:00",
+      "maxCurrentDate": "2026-11-17T20:00:00-06:00"
+    },
+    "modelQuality": {
+      "leagueProfile": [
+        {
+          "league": "NFL",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.6810900174901316,
+          "actionLogLoss": 0.7422869082605836,
+          "actionCalibrationError": 0.1813591300105395
+        },
+        {
+          "league": "NBA",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.662120116327139,
+          "actionLogLoss": 0.7162745727002989,
+          "actionCalibrationError": 0.1590309373290105
+        },
+        {
+          "league": "MLB",
+          "teams": 8,
+          "historicalRows": 160,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 120,
+          "testGames": 40,
+          "actionModel": "logistic",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.26123902016434297,
+          "actionLogLoss": 0.26123902016434297,
+          "actionCalibrationError": 0.15741029134869022
+        },
+        {
+          "league": "NHL",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "ensemble",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.36000866011906446,
+          "actionLogLoss": 0.39328548773971755,
+          "actionCalibrationError": 0.12565553936512097
+        },
+        {
+          "league": "MLS",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.14098263293167357,
+          "actionLogLoss": 0.14098263293167357,
+          "actionCalibrationError": 0.08080342654978699
+        },
+        {
+          "league": "NCAAF",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "ensemble",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.7049217400755765,
+          "actionLogLoss": 0.7301886452350101,
+          "actionCalibrationError": 0.16363270609920721
+        },
+        {
+          "league": "NCAAB",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "poisson",
+          "bestLogLoss": 0.6667723849395301,
+          "actionLogLoss": 0.6718113998564281,
+          "actionCalibrationError": 0.1391745673303653
+        }
+      ],
+      "tinyHoldouts": [
+        {
+          "league": "NFL",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.6810900174901316,
+          "actionLogLoss": 0.7422869082605836,
+          "actionCalibrationError": 0.1813591300105395
+        },
+        {
+          "league": "NBA",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.662120116327139,
+          "actionLogLoss": 0.7162745727002989,
+          "actionCalibrationError": 0.1590309373290105
+        },
+        {
+          "league": "MLB",
+          "teams": 8,
+          "historicalRows": 160,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 120,
+          "testGames": 40,
+          "actionModel": "logistic",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.26123902016434297,
+          "actionLogLoss": 0.26123902016434297,
+          "actionCalibrationError": 0.15741029134869022
+        },
+        {
+          "league": "NHL",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "ensemble",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.36000866011906446,
+          "actionLogLoss": 0.39328548773971755,
+          "actionCalibrationError": 0.12565553936512097
+        },
+        {
+          "league": "MLS",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "logistic",
+          "bestLogLoss": 0.14098263293167357,
+          "actionLogLoss": 0.14098263293167357,
+          "actionCalibrationError": 0.08080342654978699
+        },
+        {
+          "league": "NCAAF",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "ensemble",
+          "benchmarkModel": "market",
+          "bestLogLoss": 0.7049217400755765,
+          "actionLogLoss": 0.7301886452350101,
+          "actionCalibrationError": 0.16363270609920721
+        },
+        {
+          "league": "NCAAB",
+          "teams": 8,
+          "historicalRows": 128,
+          "currentRows": 1,
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "trainGames": 96,
+          "testGames": 32,
+          "actionModel": "logistic",
+          "benchmarkModel": "poisson",
+          "bestLogLoss": 0.6667723849395301,
+          "actionLogLoss": 0.6718113998564281,
+          "actionCalibrationError": 0.1391745673303653
+        }
+      ],
+      "actionBenchmarkGaps": [
+        {
+          "league": "NFL",
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "logLossGap": 0.061196890770451984,
+          "actionCalibrationError": 0.1813591300105395
+        },
+        {
+          "league": "NBA",
+          "actionModel": "logistic",
+          "benchmarkModel": "market",
+          "logLossGap": 0.054154456373159965,
+          "actionCalibrationError": 0.1590309373290105
+        },
+        {
+          "league": "MLB",
+          "actionModel": "logistic",
+          "benchmarkModel": "logistic",
+          "logLossGap": 0,
+          "actionCalibrationError": 0.15741029134869022
+        },
+        {
+          "league": "NCAAF",
+          "actionModel": "ensemble",
+          "benchmarkModel": "market",
+          "logLossGap": 0.02526690515943364,
+          "actionCalibrationError": 0.16363270609920721
+        }
+      ],
+      "oversizedEdges": [
+        {
+          "id": "MLS-2026-DAL-MIA-away",
+          "league": "MLS",
+          "matchup": "Inter Miami CF at FC Dallas",
+          "model": "logistic",
+          "probability": 0.7470548076261223,
+          "edge": 0.2586827146028665,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        },
+        {
+          "id": "MLB-2026-TEX-NYY-home",
+          "league": "MLB",
+          "matchup": "Texas Rangers at New York Yankees",
+          "model": "logistic",
+          "probability": 0.7197238207548557,
+          "edge": 0.16293295537024044,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        }
+      ],
+      "cappedKelly": [
+        {
+          "id": "MLS-2026-DAL-MIA-away",
+          "league": "MLS",
+          "matchup": "Inter Miami CF at FC Dallas",
+          "model": "logistic",
+          "probability": 0.7470548076261223,
+          "edge": 0.2586827146028665,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        },
+        {
+          "id": "MLB-2026-TEX-NYY-home",
+          "league": "MLB",
+          "matchup": "Texas Rangers at New York Yankees",
+          "model": "logistic",
+          "probability": 0.7197238207548557,
+          "edge": 0.16293295537024044,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        }
+      ],
+      "modelMarketGaps": [
+        {
+          "id": "MLS-2026-DAL-MIA-away",
+          "league": "MLS",
+          "matchup": "Inter Miami CF at FC Dallas",
+          "model": "logistic",
+          "probability": 0.7470548076261223,
+          "edge": 0.2586827146028665,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        },
+        {
+          "id": "MLB-2026-TEX-NYY-home",
+          "league": "MLB",
+          "matchup": "Texas Rangers at New York Yankees",
+          "model": "logistic",
+          "probability": 0.7197238207548557,
+          "edge": 0.16293295537024044,
+          "kelly": 0.08,
+          "riskFlags": [
+            "model-market gap"
+          ]
+        }
+      ]
+    }
+  },
+  "riskSummary": [
+    {
+      "severity": "Critical",
+      "issue": "Historical games and odds are synthetic seeded data, not actual prior-season results or closing lines.",
+      "evidence": "928 historical rows are generated in src/data/sportsData.mjs; source labels are seed-historical.",
+      "impact": "Holdout accuracy, ROI, feature weights, and action-model tuning are useful for UI plumbing only, not real betting confidence.",
+      "remediation": "Replace seed history with provider-backed historical game results plus opening/closing odds before using recommendations financially."
+    },
+    {
+      "severity": "High",
+      "issue": "Some current slate games are past-dated but still marked scheduled.",
+      "evidence": "4 current slate rows have gameTime before audit time and status != final.",
+      "impact": "Pick settlement and live accuracy can remain pending even after games should be settled.",
+      "remediation": "Prefer live-provider canonical status for current slate, and add a test that past current-slate rows must be final or live-mapped."
+    },
+    {
+      "severity": "High",
+      "issue": "Holdout sizes are too small for stable per-league model selection.",
+      "evidence": "7/7 leagues have fewer than 50 holdout games.",
+      "impact": "Log loss differences between action and benchmark models can be noise; league-level tuning may overfit demo history.",
+      "remediation": "Train/test on full multi-season provider data and use rolling-origin backtests by season/week."
+    },
+    {
+      "severity": "Medium",
+      "issue": "Several recommended picks show unusually large model-market gaps.",
+      "evidence": "2/7 current picks include model-market gap flags; 2 have edge > 12%.",
+      "impact": "Large apparent edges are more likely seed-data artifacts than true sportsbook mispricing.",
+      "remediation": "Keep the risk flag, lower confidence on model-market gaps, and validate against real closing-line movement."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "EdgeLab Sports",
+  "short_name": "EdgeLab",
+  "description": "Local sports betting model desk with live results, best bets, and accuracy tracking.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "orientation": "any",
+  "categories": ["sports", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Best Bets",
+      "short_name": "Bets",
+      "description": "Open the recommended picks board.",
+      "url": "/?view=best",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Accuracy Tracker",
+      "short_name": "Accuracy",
+      "description": "Open model accuracy diagnostics.",
+      "url": "/?view=accuracy",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "edgelab-sports",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first sports betting tracker with train/test model evaluation, live score polling, and pick accuracy analytics.",
+  "scripts": {
+    "app": "powershell -ExecutionPolicy Bypass -File scripts/launch-edgelab.ps1",
+    "start": "node server/index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build-check.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
